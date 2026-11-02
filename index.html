@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>ENAF test owner password</title>
+    <style>
+      body { margin: 0; background: #101820; color: #f4f7f6; font: 18px/1.5 system-ui, sans-serif; }
+      main { max-width: 620px; margin: 40px auto; padding: 28px; }
+      section { margin: 18px 0; padding: 24px; border: 1px solid #527080; border-radius: 14px; background: #1d2b35; }
+      label, input, button { display: block; width: 100%; box-sizing: border-box; }
+      input { margin: 7px 0 16px; padding: 12px; border: 1px solid #9ab0ba; border-radius: 8px; font-size: 18px; }
+      button { padding: 12px; border: 0; border-radius: 8px; background: #79d2a6; color: #102018; font-weight: 700; font-size: 16px; }
+      .note { color: #c8d6db; } .warn { padding: 12px; border-radius: 8px; background: #4a291f; } .ok { padding: 12px; border-radius: 8px; background: #1e473b; }
+      .hidden { display: none; }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>ENAF test owner password</h1>
+      <p class="note">Private test system only. No member service, payment, recording, transcription, phone routing, or emergency support is available here.</p>
+      <section>
+        <h2>Set your password</h2>
+        <p id="status" class="note">Open the newest ENAF password-recovery email in this browser.</p>
+        <div id="form" class="hidden">
+          <label for="password">Choose a test owner password</label>
+          <input id="password" type="password" autocomplete="new-password" minlength="12">
+          <button id="save" type="button">Save password</button>
+        </div>
+      </section>
+      <p class="note">Never enter a member PIN, payment-card number, bank information, or another person’s password here.</p>
+    </main>
+    <script>
+      const projectUrl = 'https://efbsdpeowuwwbzaujyqs.supabase.co';
+      const status = document.getElementById('status');
+      const form = document.getElementById('form');
+      const params = new URLSearchParams(location.hash.slice(1));
+      const token = params.get('access_token');
+      const linkError = params.get('error_code') || params.get('error');
+
+      if (token) {
+        form.classList.remove('hidden');
+        status.textContent = 'This secure link is ready. Choose a password now.';
+        status.className = 'ok';
+        history.replaceState({}, '', location.pathname);
+      } else if (linkError) {
+        status.textContent = 'This recovery link is no longer valid. Request a new one, then open the newest email right away.';
+        status.className = 'warn';
+        history.replaceState({}, '', location.pathname);
+      }
+
+      document.getElementById('save').addEventListener('click', async () => {
+        const password = document.getElementById('password').value;
+        if (password.length < 12) {
+          status.textContent = 'Use at least 12 characters.';
+          status.className = 'warn';
+          return;
+        }
+        const response = await fetch(`${projectUrl}/auth/v1/user`, {
+          method: 'PUT',
+          headers: { 'authorization': `Bearer ${token}`, 'content-type': 'application/json' },
+          body: JSON.stringify({ password })
+        });
+        document.getElementById('password').value = '';
+        if (!response.ok) {
+          status.textContent = 'Password could not be saved. Request one new recovery email and use it right away.';
+          status.className = 'warn';
+          return;
+        }
+        form.classList.add('hidden');
+        status.textContent = 'Password saved. Return to ENAF when you are ready for the next test-only setup step.';
+        status.className = 'ok';
+      });
+    </script>
+  </body>
+</html>
