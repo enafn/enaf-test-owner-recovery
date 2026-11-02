@@ -47,7 +47,7 @@
     <script>
       const projectUrl = 'https://efbsdpeowuwwbzaujyqs.supabase.co';
       const publicKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVmYnNkcGVvd3V3d2J6YXVqeXFzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTM0MDQ4MjAsImV4cCI6MjEwODk4MDgyMH0.j-g66I9IGccb9GAB0XDJjC3BG0qwWxltV0YfF4LKTDg';
-      const ownerCheckUrl = `${projectUrl}/functions/v1/enaf-test-owner-access-check`;
+      const ownerCheckUrl = `${projectUrl}/rest/v1/rpc/enaf_test_current_owner_access`;
       const status = document.getElementById('status');
       const signinStatus = document.getElementById('signin-status');
       const roleStatus = document.getElementById('role-status');
@@ -120,10 +120,13 @@
 
       checkRole.addEventListener('click', async () => {
         const response = await fetch(ownerCheckUrl, {
-          headers: { 'apikey': publicKey, 'authorization': `Bearer ${ownerAccessToken}` }
+          method: 'POST',
+          headers: { 'apikey': publicKey, 'authorization': `Bearer ${ownerAccessToken}`, 'content-type': 'application/json' },
+          body: '{}'
         });
-        const data = await response.json().catch(() => ({}));
-        if (response.ok && data.result === 'owner-access-active') {
+        const data = await response.json().catch(() => []);
+        const role = Array.isArray(data) ? data[0] : null;
+        if (response.ok && role?.result === 'owner-access-active' && role?.role === 'owner') {
           roleStatus.textContent = 'Owner role is active. No operational records are shown here.';
           roleStatus.className = 'ok';
           return;
