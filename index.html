@@ -32,12 +32,13 @@
     </main>
     <script>
       const projectUrl = 'https://efbsdpeowuwwbzaujyqs.supabase.co';
-      const publicKey = 'sb_publishable_5cAPj9eccNVzyrAiWPnk5g_oK04MjRa';
+      const publicKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVmYnNkcGVvd3V3d2J6YXVqeXFzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTM0MDQ4MjAsImV4cCI6MjEwODk4MDgyMH0.j-g66I9IGccb9GAB0XDJjC3BG0qwWxltV0YfF4LKTDg';
       const status = document.getElementById('status');
       const form = document.getElementById('form');
       const params = new URLSearchParams(location.hash.slice(1));
       const token = params.get('access_token');
       const linkError = params.get('error_code') || params.get('error');
+
       if (token) {
         form.classList.remove('hidden');
         status.textContent = 'This secure link is ready. Choose a password now.';
@@ -48,6 +49,7 @@
         status.className = 'warn';
         history.replaceState({}, '', location.pathname);
       }
+
       document.getElementById('save').addEventListener('click', async () => {
         const password = document.getElementById('password').value;
         if (password.length < 12) {
@@ -55,9 +57,9 @@
           status.className = 'warn';
           return;
         }
-        const response = await fetch(projectUrl + '/auth/v1/user', {
+        const response = await fetch(`${projectUrl}/auth/v1/user`, {
           method: 'PUT',
-          headers: { apikey: publicKey, authorization: 'Bearer ' + token, 'content-type': 'application/json' },
+          headers: { 'apikey': publicKey, 'authorization': `Bearer ${token}`, 'content-type': 'application/json' },
           body: JSON.stringify({ password })
         });
         document.getElementById('password').value = '';
