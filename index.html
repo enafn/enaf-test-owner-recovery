@@ -28,12 +28,31 @@
           <button id="save" type="button">Save password</button>
         </div>
       </section>
+      <section>
+        <h2>Private owner sign-in</h2>
+        <p id="signin-status" class="note">Use only your ENAF owner email and the password you created. This page cannot show member, provider, payment, phone, recording, or transcript data.</p>
+        <label for="email">Owner email</label>
+        <input id="email" type="email" autocomplete="username">
+        <label for="login-password">Owner password</label>
+        <input id="login-password" type="password" autocomplete="current-password">
+        <button id="sign-in" type="button">Sign in to private owner check</button>
+      </section>
+      <section>
+        <h2>Owner role check</h2>
+        <p id="role-status" class="note">Sign in first. This check returns only whether the signed-in test account has an active owner role.</p>
+        <button id="check-role" type="button" disabled>Check owner role</button>
+      </section>
       <p class="note">Never enter a member PIN, payment-card number, bank information, or another person’s password here.</p>
     </main>
     <script>
       const projectUrl = 'https://efbsdpeowuwwbzaujyqs.supabase.co';
       const publicKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVmYnNkcGVvd3V3d2J6YXVqeXFzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTM0MDQ4MjAsImV4cCI6MjEwODk4MDgyMH0.j-g66I9IGccb9GAB0XDJjC3BG0qwWxltV0YfF4LKTDg';
+      const ownerCheckUrl = `${projectUrl}/functions/v1/enaf-test-owner-access-check`;
       const status = document.getElementById('status');
+      const signinStatus = document.getElementById('signin-status');
+      const roleStatus = document.getElementById('role-status');
+      const checkRole = document.getElementById('check-role');
+      let ownerAccessToken = '';
       const form = document.getElementById('form');
       const params = new URLSearchParams(location.hash.slice(1));
       const token = params.get('access_token');
@@ -71,6 +90,46 @@
         form.classList.add('hidden');
         status.textContent = 'Password saved. Return to ENAF when you are ready for the next test-only setup step.';
         status.className = 'ok';
+      });
+
+      document.getElementById('sign-in').addEventListener('click', async () => {
+        const email = document.getElementById('email').value.trim();
+        const password = document.getElementById('login-password').value;
+        if (!email || !password) {
+          signinStatus.textContent = 'Enter your ENAF owner email and password.';
+          signinStatus.className = 'warn';
+          return;
+        }
+        const response = await fetch(`${projectUrl}/auth/v1/token?grant_type=password`, {
+          method: 'POST',
+          headers: { 'apikey': publicKey, 'content-type': 'application/json' },
+          body: JSON.stringify({ email, password })
+        });
+        document.getElementById('login-password').value = '';
+        const data = await response.json().catch(() => ({}));
+        if (!response.ok || typeof data.access_token !== 'string') {
+          signinStatus.textContent = 'Sign-in could not be verified. Check your owner email and password.';
+          signinStatus.className = 'warn';
+          return;
+        }
+        ownerAccessToken = data.access_token;
+        checkRole.disabled = false;
+        signinStatus.textContent = 'Signed in to the private test check. Your password is not stored by this page.';
+        signinStatus.className = 'ok';
+      });
+
+      checkRole.addEventListener('click', async () => {
+        const response = await fetch(ownerCheckUrl, {
+          headers: { 'apikey': publicKey, 'authorization': `Bearer ${ownerAccessToken}` }
+        });
+        const data = await response.json().catch(() => ({}));
+        if (response.ok && data.result === 'owner-access-active') {
+          roleStatus.textContent = 'Owner role is active. No operational records are shown here.';
+          roleStatus.className = 'ok';
+          return;
+        }
+        roleStatus.textContent = 'Owner role check did not succeed. No records were shown.';
+        roleStatus.className = 'warn';
       });
     </script>
   </body>
