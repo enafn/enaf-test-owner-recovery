@@ -128,11 +128,14 @@
       });
       document.getElementById('password').value = '';
       const data = await response.json().catch(() => ({}));
-      if (!response.ok || typeof data.access_token !== 'string') {
+      const token = typeof data.access_token === 'string'
+        ? data.access_token
+        : (typeof data.session?.access_token === 'string' ? data.session.access_token : '');
+      if (!response.ok || !token) {
         showMessage(signInStatus, 'Sign-in could not be verified.', 'warn');
         return;
       }
-      accessToken = data.access_token;
+      accessToken = token;
       signInPanel.classList.add('hidden');
       workspace.classList.remove('hidden');
       await loadAvailability();
