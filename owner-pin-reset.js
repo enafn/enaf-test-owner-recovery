@@ -3,6 +3,7 @@
 
 const projectUrl = 'https://ltosmnrnsnkuemfzhwpb.supabase.co';
 const publicKey = 'sb_publishable_w3kj9kAGGNrQWCxBvUFnLg_yupbHoMz';
+const ownerIdentityUrl = projectUrl + '/functions/v1/enaf-phase-one-staff-portal?action=owner-identity';
 const staffPortalUrl = projectUrl + '/functions/v1/enaf-phase-one-staff-portal?action=staging-test-pin-reset';
 
 let accessToken = '';
@@ -26,13 +27,31 @@ function apiHeaders() {
   return { apikey: publicKey, authorization: 'Bearer ' + accessToken, 'content-type': 'application/json' };
 }
 
+function setResetControlsEnabled(enabled) {
+  pinInput.disabled = !enabled;
+  resetButton.disabled = !enabled;
+}
+
 function clearSession() {
   accessToken = '';
   resetIdempotencyKey = crypto.randomUUID();
   passwordInput.value = '';
   pinInput.value = '';
+  setResetControlsEnabled(false);
   resetPanel.classList.add('hidden');
   signInPanel.classList.remove('hidden');
+}
+
+async function ownerAuthorizationIsVerified() {
+  const response = await fetch(ownerIdentityUrl, {
+    method: 'GET',
+    headers: apiHeaders(),
+    cache: 'no-store',
+    credentials: 'omit',
+    referrerPolicy: 'no-referrer'
+  });
+  const data = await response.json().catch(() => ({}));
+  return response.ok && data.result === 'owner-identity-authorized';
 }
 
 function rejectFramedPage() {
@@ -74,7 +93,15 @@ if (!rejectFramedPage()) {
       accessToken = data.access_token;
       signInPanel.classList.add('hidden');
       resetPanel.classList.remove('hidden');
-      showMessage(resetStatus, 'Owner access is verified. Enter a staging-only four-digit PIN.', 'ok');
+      setResetControlsEnabled(false);
+      showMessage(resetStatus, 'Checking ENAF owner authorization.', 'note');
+      if (!await ownerAuthorizationIsVerified()) {
+        clearSession();
+        showMessage(signInStatus, 'Owner authorization could not be confirmed.', 'warn');
+        return;
+      }
+      setResetControlsEnabled(true);
+      showMessage(resetStatus, 'Owner authorization is verified. Enter a staging-only four-digit PIN.', 'ok');
     } catch {
       showMessage(signInStatus, 'Sign-in could not be verified.', 'warn');
     } finally {
