@@ -1,0 +1,14 @@
+:root { color-scheme: dark; --bg:#101820; --card:#1d2b35; --line:#527080; --text:#f4f7f6; --muted:#c8d6db; --ok:#1e473b; --warn:#4a291f; --button:#79d2a6; }
+* { box-sizing: border-box; }
+body { margin: 0; min-height: 100vh; background: var(--bg); color: var(--text); font: 18px/1.5 system-ui, sans-serif; }
+main { max-width: 640px; margin: 40px auto; padding: 28px; }
+section { margin: 18px 0; padding: 24px; border: 1px solid var(--line); border-radius: 14px; background: var(--card); }
+label, input, button { display: block; width: 100%; }
+input { margin: 7px 0 16px; padding: 12px; border: 1px solid #9ab0ba; border-radius: 8px; font-size: 18px; color: #102018; background: #fff; }
+button { margin: 10px 0; padding: 12px; border: 0; border-radius: 8px; background: var(--button); color: #102018; font-weight: 700; font-size: 16px; cursor: pointer; }
+button[disabled] { opacity: .55; cursor: not-allowed; }
+.note { color: var(--muted); }
+.warn, .ok { padding: 12px; border-radius: 8px; }
+.warn { background: var(--warn); }
+.ok { background: var(--ok); }
+.hidden { display: none; }

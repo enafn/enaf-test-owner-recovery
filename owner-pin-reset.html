@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow, noarchive">
+  <meta name="referrer" content="no-referrer">
+  <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
+  <meta http-equiv="Pragma" content="no-cache">
+  <!-- GitHub Pages cannot set response CSP headers. Keep this page self-contained
+       and allow network connections only to the approved staging project. -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; connect-src https://ltosmnrnsnkuemfzhwpb.supabase.co; img-src 'none'; font-src 'none'; object-src 'none'; base-uri 'none'; form-action 'self'">
+  <title>ENAF staging owner PIN reset</title>
+  <link rel="stylesheet" href="owner-pin-reset.css">
+  <script src="owner-pin-reset.js" defer></script>
+</head>
+<body>
+  <main>
+    <h1>ENAF staging owner PIN reset</h1>
+    <p class="note">ENAF TEST — NOT LIVE. This page is limited to the fictional IVR test member. It does not enable telephone routing or show customer, payment, phone, or provider information.</p>
+
+    <section id="sign-in-panel">
+      <h2>Owner sign-in</h2>
+      <p id="sign-in-status" class="note" role="status">Use your approved ENAF owner account. This page does not store your password or staging test PIN.</p>
+      <form id="sign-in-form" autocomplete="off">
+        <label for="email">Owner email</label>
+        <input id="email" type="email" autocomplete="username" spellcheck="false" required>
+        <label for="password">Owner password</label>
+        <input id="password" type="password" autocomplete="current-password" required>
+        <button id="sign-in" type="submit">Sign in</button>
+      </form>
+    </section>
+
+    <section id="reset-panel" class="hidden">
+      <h2>Reset fictional test PIN</h2>
+      <p id="reset-status" class="note" role="status">Set a four-digit staging-only PIN for the upcoming IVR test. Do not reuse a personal PIN.</p>
+      <form id="reset-form" autocomplete="off">
+        <label for="pin">New staging test PIN</label>
+        <input id="pin" type="password" inputmode="numeric" pattern="[0-9]{4}" maxlength="4" autocomplete="off" spellcheck="false" required>
+        <button id="reset" type="submit">Reset staging test PIN</button>
+      </form>
+      <button id="sign-out" type="button">Sign out</button>
+    </section>
+  </main>
+</body>
+</html>
